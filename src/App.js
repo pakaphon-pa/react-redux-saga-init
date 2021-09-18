@@ -1,7 +1,17 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
+import { get } from "lodash";
+import PropTypes from "prop-types";
+import { bindActionCreators } from "redux";
+import { createAction } from "redux-actions";
+import { PRE_LOAD_DATA } from "./redux/actions/type";
 
-function App() {
+function App(props) {
+  useEffect(() => {
+    props.preload();
+  }, []);
   return (
     <div className="App">
       <header className="App-header">
@@ -22,4 +32,19 @@ function App() {
   );
 }
 
-export default App;
+const load = createAction("PRE_LOAD_DATA");
+
+App.prototype = {
+  starter: PropTypes.object,
+  getStarter: PropTypes.func,
+};
+
+const mapStateToProps = (state) => ({
+  starter: get(state, "", {}),
+});
+
+const mapStateToDispatch = (dispatch) => ({
+  preload: bindActionCreators(load, dispatch),
+});
+
+export default connect(mapStateToProps, mapStateToDispatch)(App);

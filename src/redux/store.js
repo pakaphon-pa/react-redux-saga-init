@@ -3,16 +3,23 @@ import { configureStore } from "@reduxjs/toolkit";
 import rootReducer from "./reducer";
 import { logger, monitorReducerEnhancer } from "./middleware/middleware";
 import rootSages from "./saga";
-const sagaMiddleware = createSagaMiddleware();
+import { routerMiddleware } from "connected-react-router";
+import { createBrowserHistory } from "history";
 
-const store = configureStore({
-  reducer: rootReducer,
-  middleware: [sagaMiddleware, logger],
-  devTools: process.env.NODE_ENV !== "production",
-  preloadedState: null,
-  enhancers: [monitorReducerEnhancer],
-});
+export const history = createBrowserHistory();
 
-sagaMiddleware.run(rootSages);
+export default function configStore(preloadedState) {
+  const sagaMiddleware = createSagaMiddleware();
 
-export default store;
+  const store = configureStore({
+    reducer: rootReducer(history),
+    middleware: [routerMiddleware(history), sagaMiddleware, logger],
+    devTools: process.env.NODE_ENV !== "production",
+    preloadedState,
+    enhancers: [monitorReducerEnhancer],
+  });
+
+  sagaMiddleware.run(rootSages);
+
+  return store;
+}
